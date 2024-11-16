@@ -28,19 +28,12 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 
-// CORS Configuration
-const corsOptions = {
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Preflight requests
+app.use(cors());
 
 // Middleware
 app.use(express.json());
 app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ policy: "same-site" }));
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
