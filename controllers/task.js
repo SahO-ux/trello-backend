@@ -22,13 +22,12 @@ export const createTask = async (req, res) => {
 // Update
 export const updateTask = async (req, res) => {
   try {
-    const { title, description } = req.body;
-    //   const user = await User.findById(userId);
+    const { title, description, taskId } = req.body;
 
     const updateTask = await Task.updateOne(
       {
         userId: mongoose.Types.ObjectId(req.params.userId),
-        _id: mongoose.Types.ObjectId(req.params.userId),
+        _id: mongoose.Types.ObjectId(taskId),
       },
       {
         $set: {
