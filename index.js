@@ -1,36 +1,34 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import helmet from "helmet";
 import morgan from "morgan";
-import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import { register } from "./controllers/auth.js";
 import connectDB from "./mongoDB/connect.js";
 import { verifyToken } from "./middleware/auth.js";
-import {
-  createTask,
-  getUserTasks,
-  updateTask,
-  deleteTask,
-} from "./controllers/task.js";
+import { createTask, getUserTasks, updateTask, deleteTask } from "./controllers/task.js";
 
 // App setup
 dotenv.config();
 const app = express();
 
-app.use(
-  cors({
-    origin: ["https://trello-frontend-delta.vercel.app"],
-    method: ["POST", "GET", "PATCH", "DELETE"],
-    credentials: true,
-  })
-);
+// CORS Configuration
+const allowedOrigins = ["https://trello-frontend-delta.vercel.app"];
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // Middleware
 app.use(express.json());
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 // Vercel route
@@ -47,26 +45,15 @@ app.delete("/delete-task/:taskId", verifyToken, deleteTask);
 app.use("/auth", authRoutes);
 
 // Start server
-
 const startServer = async () => {
   try {
-    mongoose.set("strictQuery", false);
-    mongoose
-      .connect(
-        "mongodb+srv://sahil:654321S%40hu@cluster0.ul6xkaa.mongodb.net/",
-        {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        }
-      )
-      .then(() => console.log("MongoDB Connected"))
-      .catch((err) => console.log(err));
+    await connectDB(process.env.MONGODB_URL);
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () =>
       console.log(`SERVER LISTENING AT http://localhost:${PORT}`)
     );
   } catch (error) {
-    console.log(error);
+    console.error("Failed to start server:", error.message);
   }
 };
 startServer();
