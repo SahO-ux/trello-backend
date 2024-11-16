@@ -14,15 +14,17 @@ import { createTask, getUserTasks, updateTask, deleteTask } from "./controllers/
 dotenv.config();
 const app = express();
 
-// CORS Configuration
+// CORS Configuration: Allow only specific frontend origin
 const allowedOrigins = ["https://trello-frontend-delta.vercel.app"];
 const corsOptions = {
   origin: allowedOrigins,
-  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  credentials: true,
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"], // Allow specific methods
+  credentials: true, // Allow credentials (cookies, authorization headers)
+  allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
 };
+
+// Apply CORS middleware globally
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 // Middleware
 app.use(express.json());
@@ -30,6 +32,9 @@ app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
+
+// Handle preflight OPTIONS requests
+app.options("*", cors(corsOptions));  // Preflight requests
 
 // Vercel route
 app.get("/", (req, res) => {
