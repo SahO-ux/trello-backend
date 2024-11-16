@@ -19,7 +19,7 @@ import {
 } from "./controllers/task.js";
 
 // Replace this with your deployed frontend URL
-const allowedOrigins = ["https://trello-backend-sooty.vercel.app"];
+const allowedOrigins = ["https://trello-frontend-delta.vercel.app"];
 
 const corsOptions = {
   origin: allowedOrigins,
