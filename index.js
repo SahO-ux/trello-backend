@@ -22,9 +22,15 @@ import {
 const allowedOrigins = ["https://trello-frontend-delta.vercel.app"];
 
 const corsOptions = {
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  credentials: true, // Allow cookies or authorization headers
+  origin: function (origin, callback) {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  credentials: true, // Enable cookies and other credentials
 };
 
 //Configs needed since we're using type="module"
@@ -35,6 +41,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
