@@ -19,7 +19,13 @@ import {
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://trello-frontend-delta.vercel.app"],
+    method: ["POST", "GET", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
 
 // Middleware
 app.use(express.json());
