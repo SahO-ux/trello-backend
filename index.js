@@ -18,6 +18,15 @@ import {
   deleteTask,
 } from "./controllers/task.js";
 
+// Replace this with your deployed frontend URL
+const allowedOrigins = ["https://trello-backend-sooty.vercel.app"];
+
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true, // Allow cookies or authorization headers
+};
+
 //Configs needed since we're using type="module"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +34,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
