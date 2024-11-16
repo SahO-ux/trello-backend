@@ -1,8 +1,6 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv, { config } from "dotenv";
-import multer from "multer";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
@@ -12,7 +10,6 @@ import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 
 import { register } from "./controllers/auth.js";
-// import { createPost } from "./controllers/posts.js";
 import connectDB from "./mongoDB/connect.js";
 import { verifyToken } from "./middleware/auth.js";
 import {
@@ -21,9 +18,6 @@ import {
   updateTask,
   deleteTask,
 } from "./controllers/task.js";
-// import User from "./mongoDB/models/Users.js";
-// import PostModel from "./mongoDB/models/Post.js";
-// import { users, posts } from "./data/index.js";
 
 //Configs needed since we're using type="module"
 const __filename = fileURLToPath(import.meta.url);
@@ -61,10 +55,6 @@ const startServer = async () => {
     app.listen(PORT, () =>
       console.log(`SERVER LISTENING AT http://localhost:${PORT}`)
     );
-
-    //  // Add Data one time
-    //  await User.insertMany(users);
-    //  await PostModel.insertMany(posts);
   } catch (error) {
     console.log(error);
   }
