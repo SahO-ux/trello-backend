@@ -31,16 +31,28 @@ const UserSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
       min: 5,
+      validate: {
+        validator: function (val) {
+          // Ensure password is provided if not using Google OAuth
+          return this.googleLogin || (val && val.length >= 5);
+        },
+        message: "Password is required and must be at least 5 characters long.",
+      },
     },
+
+    googleLogin: {
+      type: Boolean,
+      default: false, // Indicates if the user logged in via Google
+    },
+
     isDeleted: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   {
-    timestamps: true, // Gives automatic dates for when its created/updated...
+    timestamps: true, // Gives automatic dates for when it's created/updated
   }
 );
 

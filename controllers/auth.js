@@ -1,10 +1,13 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import User from "../mongoDB/models/User.js";
+import { OAuth2Client } from "google-auth-library";
 import _ from "lodash";
 
-//Registering User
+import User from "../mongoDB/models/User.js";
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+//Registering User
 export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, picturePath } = req.body;
@@ -38,22 +41,52 @@ export const register = async (req, res) => {
   }
 };
 
+// Handle login
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const _user = await User.findOne({ email: email }).lean();
-    // const _user = _.cloneDeep(user.lean());
+    const { email, password, googleToken } = req.body;
 
-    if (!_user) return res.status(400).json({ msg: "User does not exist." });
+    if (googleToken) {
+      // Handle Google OAuth login
+      const ticket = await googleClient.verifyIdToken({
+        idToken: googleToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
 
-    const isMatch = await bcrypt.compare(password, _user.password);
+      const payload = ticket.getPayload(); // Decoded Google user info
+      const { email: googleEmail, given_name, family_name } = payload;
 
-    if (!isMatch) return res.status(400).json({ msg: "Invalid password" });
+      let user = await User.findOne({ email: googleEmail });
 
-    const token = jwt.sign({ id: _user.id }, process.env.JWT_SECRET);
-    delete _user.password; //does not get sent back to frtnd
+      if (!user) {
+        // If user doesn't exist, create a new one
+        user = new User({
+          email: googleEmail,
+          firstName: given_name,
+          lastName: family_name,
+          password: null, // Password not needed for OAuth
+          googleLogin: true,
+        });
+        await user.save();
+      }
 
-    res.status(200).json({ token, user: _user });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      return res.status(200).json({ token, user });
+    } else {
+      // Handle traditional email/password login
+      const user = await User.findOne({ email }).lean();
+
+      if (!user) return res.status(400).json({ msg: "User does not exist." });
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) return res.status(400).json({ msg: "Invalid password" });
+
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      delete user.password; // Remove password before sending response
+
+      return res.status(200).json({ token, user });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

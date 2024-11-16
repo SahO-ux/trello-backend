@@ -7,7 +7,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.js";
-import userRoutes from "./routes/users.js";
 
 import { register } from "./controllers/auth.js";
 import connectDB from "./mongoDB/connect.js";
@@ -35,10 +34,8 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
-
 //ROUTES
 app.post("/auth/register", register);
-app.use("/users", userRoutes);
 
 app.post("/:userId/create-task", verifyToken, createTask);
 app.patch("/:userId/update-task", verifyToken, updateTask);
