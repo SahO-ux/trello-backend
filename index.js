@@ -37,6 +37,11 @@ app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
+//VERCEL route
+app.get("/", (req, res) => {
+  res.json("Hello");
+});
+
 //ROUTES
 app.post("/auth/register", register);
 
