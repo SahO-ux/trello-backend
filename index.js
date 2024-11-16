@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import { register } from "./controllers/auth.js";
@@ -40,9 +41,20 @@ app.delete("/delete-task/:taskId", verifyToken, deleteTask);
 app.use("/auth", authRoutes);
 
 // Start server
+
 const startServer = async () => {
   try {
-    connectDB(process.env.MONGODB_URL);
+    mongoose.set("strictQuery", false);
+    mongoose
+      .connect(
+        "mongodb+srv://sahil:654321S%40hu@cluster0.ul6xkaa.mongodb.net/",
+        {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+        }
+      )
+      .then(() => console.log("MongoDB Connected"))
+      .catch((err) => console.log(err));
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () =>
       console.log(`SERVER LISTENING AT http://localhost:${PORT}`)
