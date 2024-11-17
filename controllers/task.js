@@ -5,11 +5,12 @@ import mongoose from "mongoose";
 // Create Task
 export const createTask = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, status } = req.body;
 
     const newTask = await Task.create({
       userId: mongoose.Types.ObjectId(req.params.userId),
       title: title?.trim(),
+      status,
       description,
     });
 
@@ -22,7 +23,7 @@ export const createTask = async (req, res) => {
 // Update
 export const updateTask = async (req, res) => {
   try {
-    const { title, description, taskId } = req.body;
+    const { title, description, taskId, status } = req.body;
 
     const updateTask = await Task.updateOne(
       {
@@ -33,6 +34,7 @@ export const updateTask = async (req, res) => {
         $set: {
           title: title,
           description: description,
+          ...(status ? { status } : {}),
         },
       }
     );
@@ -86,7 +88,7 @@ export const getUserTasks = async (req, res) => {
       ];
     }
 
-    const tasks = await Task.find(criteria);
+    const tasks = await Task.find(criteria).sort({ createdAt: -1 });
 
     res.status(200).json(tasks);
   } catch (err) {
