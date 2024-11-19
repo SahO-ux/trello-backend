@@ -12,7 +12,9 @@ export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, picturePath } = req.body;
 
-    const userAlreadyExists = await User.findOne({ email: email });
+    const userAlreadyExists = await User.findOne({
+      email: email?.trim()?.toLowerCase(),
+    });
 
     if (userAlreadyExists)
       return res
@@ -25,14 +27,9 @@ export const register = async (req, res) => {
     const newUser = await User.create({
       firstName,
       lastName,
-      email,
+      email: email?.trim()?.toLowerCase(),
       password: passwordHash,
-      ...(picturePath ? { picturePath } : {}),
-      //   friends,
-      //   location,
-      //   occupation,
-      //   viewedProfile: Math.floor(Math.random() * 10000),
-      //   impressions: Math.floor(Math.random() * 10000),
+      ...(picturePath ? { picturePath } : {})
     });
 
     res.status(201).json(newUser);
@@ -74,7 +71,7 @@ export const login = async (req, res) => {
       return res.status(200).json({ token, user });
     } else {
       // Handle traditional email/password login
-      const user = await User.findOne({ email }).lean();
+      const user = await User.findOne({ email: email?.trim()?.toLowerCase() }).lean();
 
       if (!user) return res.status(400).json({ msg: "User does not exist." });
 
